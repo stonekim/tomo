@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "skills": 27,
+  "upstream_files_sha256_verified": 79,
+  "required_documents_verified": 9,
+  "local_markdown_links": "passed",
+  "source_commit": "4ae2317ddb22b046e26455e4f9c9b3aaaf62212d",
+  "not_verified": [
+    "host skill autodiscovery in a fresh session",
+    "business runtime: not implemented"
+  ]
+}
