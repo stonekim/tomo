@@ -30,7 +30,7 @@ def create_app(settings=None, *, rule_registry=None, domain_routers=()):
     app.state.auth = Auth(db, settings.session_hours)
     app.state.store = Store(db, rule_registry)
     adapter = MockAdapter() if settings.model_mode == 'mock' else HttpAdapter(settings) if settings.model_mode == 'real' else None
-    app.state.models = ModelService(app.state.store, adapter, settings.model_attempts)
+    app.state.models = ModelService(app.state.store, adapter, settings.model_attempts, limits=(settings.model_daily_calls, settings.model_user_daily_calls), concurrency=settings.model_concurrency)
     if settings.allowed_origins:
         app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins), allow_credentials=False,
                            allow_methods=['GET', 'POST'], allow_headers=['Authorization', 'Content-Type'])

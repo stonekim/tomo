@@ -1,0 +1,138 @@
+{
+  "verified_at": "2026-11-12T17:37:16.831796+00:00",
+  "status": "integrated_candidate_verified_pending_independent_review",
+  "tests": {
+    "python": 116,
+    "node_api": 8,
+    "product_browser": 21,
+    "container": 5,
+    "prefix_product_browser": 21
+  },
+  "product_browser_ok": true,
+  "real_provider": {
+    "model": "glm-5.3-flash",
+    "requested_max_output_tokens": 2400,
+    "final_game_http": 200,
+    "final_game_mode": "real",
+    "final_plan_http": 200,
+    "final_plan_mode": "real",
+    "final_smoke_ok": true,
+    "runs_including_preserved_failures": 4,
+    "actual_provider_attempts": 8,
+    "final_usage": [
+      {
+        "cached_input_tokens": null,
+        "cost": null,
+        "currency": null,
+        "input_tokens": 516,
+        "output_tokens": 573
+      },
+      {
+        "cached_input_tokens": null,
+        "cost": null,
+        "currency": null,
+        "input_tokens": 312,
+        "output_tokens": 671
+      }
+    ],
+    "earlier_failures": [
+      "Illegal model tool correctly rejected without a state write",
+      "Reasoning/output limit left an unusable suggestion",
+      "Exact fenced JSON rejected by the previous parser; now accepted only with strict full fence and schema validation"
+    ]
+  },
+  "security_regressions": [
+    "cross-account stale response",
+    "cross-resource game provenance",
+    "invalid and completed request lock reclamation",
+    "duplicate provider call suppression",
+    "reported error usage",
+    "explicit cost/currency mapping",
+    "nested nonfinite JSON",
+    "persistent real-call quota",
+    "request body limit",
+    "backup/restore rollback preservation",
+    "late logout cannot clear newer login",
+    "authenticated Bob request cannot read Alice plan"
+  ],
+  "limits": {
+    "real_concurrency": 2,
+    "real_global_calls_utc_day": 200,
+    "real_calls_per_user_utc_day": 20,
+    "request_bytes": 524288,
+    "model_context_characters": 32000
+  },
+  "not_claimed": [
+    "Prediction accuracy",
+    "Retention or paid conversion",
+    "General model reliability",
+    "Public DNS/TLS launch",
+    "Measured fifteen-minute play duration"
+  ],
+  "container_validation": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "nonroot image health and migration",
+        "pass": true
+      },
+      {
+        "name": "nonroot read-only application filesystem",
+        "pass": true
+      },
+      {
+        "name": "same-origin UI and actual authenticated game write",
+        "pass": true
+      },
+      {
+        "name": "volume survives container replacement with account/session/event history",
+        "pass": true
+      },
+      {
+        "name": "configured Docker healthcheck becomes healthy",
+        "pass": true
+      }
+    ],
+    "image_id": "sha256:e341da3f53060b571cb630c6a4c266122436db92572e1792f3241d3ab4594891",
+    "scope": "Disposable nonroot container, temporary named volume, synthetic user, provider disabled; not a public TLS launch"
+  },
+  "review": "pending Agent Team independent candidate review",
+  "warnings": [
+    "Upstream Starlette/AnyIO deprecation warning; no failing checks"
+  ],
+  "local_acceptance": {
+    "bind": "127.0.0.1:8017",
+    "health_http": 200,
+    "service": "tomo-mvp-preview.service",
+    "model_mode": "real",
+    "max_output_tokens": 2400,
+    "private_configuration": "host-controlled credential reference; no key in source or unit arguments"
+  },
+  "evidence_sha256": {
+    "python-tests.txt": "91210e87f9e90e026b06a4042bee9782b15470e494cfe425f612d10b779a55fc",
+    "node-tests.txt": "22738406f33ae836f626a48e5991f83d1d0bf4f8df83151182f38a47d0d0f23c",
+    "browser-result.json": "c350f6c2f5aa559253effd645b7b3af0fc4c16ccd4da2e107e5d218ab7ad608b",
+    "real-provider-smoke.json": "672d22b238f4bb408cb6faa3d98793e96b364bc0651208c6291e1b2bce069204",
+    "container-result.json": "303dd6f77602776d60d0e35a71570a1df0a6ddd865381fd6da6117e5b6606314",
+    "docker-build-final.txt": "994fdbb10e13ca394a3a6967fddad7bfec06bdc77bbe451108debe7327ec93cf",
+    "contracts.txt": "81d04679d083558ba639c35cbb0092aa4d2d2fb235c685932edfe86d286f0e74",
+    "product-contracts.txt": "29c18b8b7edb5bfb0c867a3baeb2437dfa9456856bc281ad947fb552d45f7ffc",
+    "prefix/browser-result.json": "c350f6c2f5aa559253effd645b7b3af0fc4c16ccd4da2e107e5d218ab7ad608b",
+    "prefix/browser-run.json": "b01026cc37f0b8db745960cded34aad1736114f7681fa2e8b8768e5bd0a572a1"
+  },
+  "prefix_deployment": {
+    "prefix": "/read/tomo/app/",
+    "proxy": "isolated real HTTP prefix-stripping proxy",
+    "root_business_api_changed": false,
+    "browser_ok": true,
+    "includes": [
+      "registration",
+      "game ending/fork",
+      "plan create/update/due review",
+      "cross-account stale replies",
+      "logout usability",
+      "393/1440 layout"
+    ]
+  },
+  "verification_redaction": "Host-specific warning paths normalized to <venv>; test counts, failures and warnings preserved"
+}

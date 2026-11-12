@@ -40,15 +40,20 @@ class Store:
         branch = conn.execute('SELECT id FROM branches WHERE save_id=? AND parent_id IS NULL', (row['id'],)).fetchone()
         return {key: row[key] for key in ('id', 'domain', 'title', 'created_at')} | {'schema_version': 1, 'initial_state': json.loads(row['initial_state']), 'initial_branch_id': branch['id'] if branch else None}
 
-    def create_save(self, owner, proposal):
+    def create_save(self, owner, proposal, *, idempotency_key=None):
         validate('SaveCreate', proposal)
-        self.rules.check(proposal['domain'], None, proposal['state'], {'type': 'initialize'})
+        self.rules.check(proposal['domain'], None, proposal['state'], {'type': 'initialize', '_now': timestamp()})
         with self.db.transaction() as conn:
+            if idempotency_key:
+                fingerprint, replay = self._replay(conn, owner, idempotency_key, ['create_save'], proposal)
+                if replay is not None:
+                    return replay
             save_id = uid()
             conn.execute('INSERT INTO saves VALUES(?,?,?,?,?,?)', (save_id, owner, proposal['domain'], proposal['title'], encode(proposal['state']), timestamp()))
             if proposal['domain'] == 'game':
                 conn.execute('INSERT INTO branches VALUES(?,?,?,?,?,?)', (uid(), save_id, None, 0, 0, encode(proposal['state'])))
-            return self._save_view(conn, self._save(conn, owner, save_id))
+            response = self._save_view(conn, self._save(conn, owner, save_id))
+            return self._remember(conn, owner, idempotency_key, fingerprint, response) if idempotency_key else response
 
     def list_saves(self, owner):
         with self.db.transaction() as conn:
@@ -105,7 +110,7 @@ class Store:
             known = {event['id'] for event in current['events']}
             if not set(proposal['causes']) <= known:
                 raise PlatformError(422, 'INVALID_CAUSE', 'Causes must reference existing events in this branch')
-            self.rules.check('game', current['state'], proposal['state'], proposal)
+            self.rules.check('game', current['state'], proposal['state'], proposal | {'_context': {'owner_id': owner, 'save_id': save_id, 'branch_id': branch_id}})
             sequence = branch['revision'] + 1
             conn.execute('INSERT INTO events VALUES(?,?,?,?,?,?,?,?,?)', (branch_id, sequence, uid(), branch_id, proposal['type'], encode(proposal['payload']), encode(proposal['state']), encode(proposal['causes']), timestamp()))
             conn.execute('UPDATE branches SET revision=? WHERE id=?', (sequence, branch_id))
@@ -156,17 +161,27 @@ class Store:
             if not last and proposal['kind'] != 'judgment':
                 raise PlatformError(422, 'JUDGMENT_REQUIRED', 'First version must be a judgment')
             previous = json.loads(last['content']) if last else json.loads(save['initial_state'])
-            self.rules.check('plan', previous, proposal['content'], proposal)
+            context = dict(proposal, _now=timestamp())
+            if proposal['kind'] == 'outcome':
+                context['_judgment'] = {'id': judgment['id'], 'content': json.loads(judgment['content']), 'created_at': judgment['created_at']}
+                context['_outcome_count'] = conn.execute("SELECT count(*) FROM plan_versions WHERE save_id=? AND kind='outcome' AND based_on=?", (save_id, judgment['id'])).fetchone()[0]
+            self.rules.check('plan', previous, proposal['content'], context)
             version_id = uid()
             conn.execute('INSERT INTO plan_versions VALUES(?,?,?,?,?,?,?,?)', (version_id, save_id, revision + 1, last['id'] if last else None, proposal['kind'], encode(proposal['content']), proposal['based_on'], timestamp()))
             response = self._version_view(conn.execute('SELECT * FROM plan_versions WHERE id=?', (version_id,)).fetchone())
             return self._remember(conn, owner, proposal['idempotency_key'], fingerprint, response)
 
-    def begin_audit(self, owner, save_id, purpose, mode, model, attempt):
+    def begin_audit(self, owner, save_id, purpose, mode, model, attempt, *, limits=None):
         audit_id = uid()
         usage = dict.fromkeys(('input_tokens', 'output_tokens', 'cached_input_tokens', 'cost', 'currency'))
         with self.db.transaction() as conn:
             self._save(conn, owner, save_id)
+            if mode == 'real' and limits:
+                day = timestamp()[:10]+'%'
+                total = conn.execute("SELECT count(*) FROM model_audit WHERE mode='real' AND created_at LIKE ?", (day,)).fetchone()[0]
+                personal = conn.execute("SELECT count(*) FROM model_audit WHERE mode='real' AND owner_id=? AND created_at LIKE ?", (owner,day)).fetchone()[0]
+                if total >= limits[0] or personal >= limits[1]:
+                    raise PlatformError(429, 'MODEL_DAILY_LIMIT', 'Daily model call allowance reached')
             conn.execute('INSERT INTO model_audit VALUES(?,?,?,?,?,?,?,?,?,?)', (audit_id, owner, save_id, purpose, mode, model, attempt, 'pending', encode(usage), timestamp()))
         return audit_id
 

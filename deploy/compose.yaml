@@ -1,0 +1,35 @@
+services:
+  tomo:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "127.0.0.1:${TOMO_PORT:-8017}:8000"
+    environment:
+      TOMO_DATABASE: /data/tomo.sqlite3
+      TOMO_MODEL_MODE: ${TOMO_MODEL_MODE:-disabled}
+      TOMO_MODEL_ENDPOINT: ${TOMO_MODEL_ENDPOINT:-}
+      TOMO_MODEL_NAME: ${TOMO_MODEL_NAME:-}
+      TOMO_MODEL_API_KEY: ${TOMO_MODEL_API_KEY:-}
+      TOMO_MODEL_MAX_OUTPUT_TOKENS: ${TOMO_MODEL_MAX_OUTPUT_TOKENS:-1200}
+      TOMO_MODEL_TIMEOUT: ${TOMO_MODEL_TIMEOUT:-20}
+      TOMO_MODEL_ATTEMPTS: ${TOMO_MODEL_ATTEMPTS:-2}
+      TOMO_MODEL_CONCURRENCY: ${TOMO_MODEL_CONCURRENCY:-2}
+      TOMO_MODEL_DAILY_CALLS: ${TOMO_MODEL_DAILY_CALLS:-200}
+      TOMO_MODEL_USER_DAILY_CALLS: ${TOMO_MODEL_USER_DAILY_CALLS:-20}
+      TOMO_MODEL_COST_FIELD: ${TOMO_MODEL_COST_FIELD:-cost}
+      TOMO_MODEL_CURRENCY_FIELD: ${TOMO_MODEL_CURRENCY_FIELD:-currency}
+      TOMO_SESSION_HOURS: ${TOMO_SESSION_HOURS:-24}
+      TOMO_MAX_REQUEST_BYTES: ${TOMO_MAX_REQUEST_BYTES:-524288}
+    volumes:
+      - tomo-data:/data
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+volumes:
+  tomo-data:

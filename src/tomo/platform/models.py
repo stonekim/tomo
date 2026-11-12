@@ -1,5 +1,8 @@
 """Server-side model adapters. Persist usage on every bounded attempt."""
 import time
+import threading
+import math
+import re
 from dataclasses import dataclass
 import httpx
 from .errors import PlatformError
@@ -21,7 +24,7 @@ class ProviderFailure(Exception):
         super().__init__(status)
 
 
-def usage_from_response(body):
+def usage_from_response(body, cost_field='cost', currency_field='currency'):
     usage = body.get('usage')
     usage = usage if isinstance(usage, dict) else {}
     details = usage.get('prompt_tokens_details')
@@ -30,11 +33,27 @@ def usage_from_response(body):
     def count(value):
         return value if type(value) is int and value >= 0 else None
 
-    # Unknown costs stay null; token usage must never be inferred from text length.
+    # Only explicitly reported, finite amounts and currency codes are preserved.
+    cost = usage.get(cost_field) if cost_field else None
+    currency = usage.get(currency_field) if currency_field else None
+    cost = cost if type(cost) in (int,float) and math.isfinite(cost) and cost >= 0 else None
+    currency = currency if isinstance(currency,str) and re.fullmatch('[A-Z]{3}',currency) else None
+    # Token usage must never be inferred from text length.
     return {'input_tokens': count(usage.get('prompt_tokens')),
             'output_tokens': count(usage.get('completion_tokens')),
             'cached_input_tokens': count(details.get('cached_tokens')),
-            'cost': None, 'currency': None}
+            'cost': cost, 'currency': currency}
+
+
+def structured_json(text):
+    """Accept raw JSON or one exact JSON fence; never scrape JSON from prose."""
+    import json
+    text=text.strip()
+    fenced=re.fullmatch(r'```(?:json)?\s*(.*?)\s*```',text,flags=re.S|re.I)
+    if fenced:text=fenced.group(1)
+    value=json.loads(text)
+    json.dumps(value,allow_nan=False)
+    return value
 
 
 class MockAdapter:
@@ -55,13 +74,8 @@ class HttpAdapter:
             with httpx.Client(timeout=self.settings.model_timeout, transport=self.transport, follow_redirects=False, trust_env=False) as client:
                 with client.stream('POST', self.settings.model_endpoint,
                                    headers={'Authorization': f'Bearer {self.settings.model_api_key}'},
-                                   json={'model': self.name, 'messages': messages, 'stream': False}) as response:
-                    if response.status_code == 429:
-                        raise ProviderFailure('rate_limited', True)
-                    if response.status_code >= 500:
-                        raise ProviderFailure('provider_error', True)
-                    if response.status_code != 200:
-                        raise ProviderFailure('provider_error', False)
+                                   json={'model': self.name, 'messages': messages, 'stream': False, 'max_tokens': self.settings.model_max_output_tokens}) as response:
+                    status = response.status_code
                     data = bytearray()
                     for chunk in response.iter_bytes():
                         data.extend(chunk)
@@ -71,10 +85,16 @@ class HttpAdapter:
             try:
                 body = json.loads(data)
             except (ValueError, UnicodeError):
-                raise ProviderFailure('invalid_response', False) from None
+                raise ProviderFailure('rate_limited' if status == 429 else 'provider_error' if status != 200 else 'invalid_response', status == 429 or status >= 500) from None
             if not isinstance(body, dict):
                 raise ProviderFailure('invalid_response', False)
-            usage = usage_from_response(body)
+            usage = usage_from_response(body, self.settings.model_cost_field, self.settings.model_currency_field)
+            if status == 429:
+                raise ProviderFailure('rate_limited', True, usage)
+            if status >= 500:
+                raise ProviderFailure('provider_error', True, usage)
+            if status != 200:
+                raise ProviderFailure('provider_error', False, usage)
             try:
                 text = body['choices'][0]['message']['content']
                 if not isinstance(text, str):
@@ -89,12 +109,23 @@ class HttpAdapter:
 
 
 class ModelService:
-    def __init__(self, store, adapter=None, attempts=2, sleeper=time.sleep):
+    def __init__(self, store, adapter=None, attempts=2, sleeper=time.sleep, *, limits=(200, 20), concurrency=2):
         self.store, self.adapter, self.attempts, self.sleeper = store, adapter, attempts, sleeper
+        self.limits = limits
+        self.semaphore = threading.BoundedSemaphore(concurrency)
         if not 1 <= attempts <= 3:
             raise ValueError('Model attempts must be 1–3')
 
     def generate(self, owner, save_id, purpose, messages):
+        self.store.assert_owner(owner, save_id)
+        if not self.semaphore.acquire(blocking=False):
+            raise PlatformError(429, 'MODEL_BUSY', 'Model concurrency limit reached; retry later')
+        try:
+            return self._generate(owner, save_id, purpose, messages)
+        finally:
+            self.semaphore.release()
+
+    def _generate(self, owner, save_id, purpose, messages):
         self.store.assert_owner(owner, save_id)
         if not self.adapter:
             raise PlatformError(503, 'MODEL_DISABLED', 'No model provider configured')
@@ -107,10 +138,10 @@ class ModelService:
             if not isinstance(message, dict) or set(message) != {'role', 'content'} or message['role'] not in ('system', 'user', 'assistant') or not isinstance(message['content'], str):
                 raise PlatformError(422, 'INVALID_MODEL_REQUEST', 'Invalid message')
             total += len(message['content'])
-        if total > 200_000:
+        if total > 32_000:
             raise PlatformError(422, 'INVALID_MODEL_REQUEST', 'Model context too large')
         for attempt in range(1, self.attempts + 1):
-            audit_id = self.store.begin_audit(owner, save_id, purpose, self.adapter.mode, self.adapter.name, attempt)
+            audit_id = self.store.begin_audit(owner, save_id, purpose, self.adapter.mode, self.adapter.name, attempt, limits=self.limits)
             try:
                 result = self.adapter.complete(messages)
             except ProviderFailure as failure:

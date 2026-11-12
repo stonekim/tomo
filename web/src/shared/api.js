@@ -1,0 +1,12 @@
+const KEY='tomo.session.v1';
+export function sessionStore(storage=globalThis.sessionStorage){return {get(){try{const v=JSON.parse(storage.getItem(KEY)||'null');if(v&&typeof v.token==='string'&&Date.parse(v.expires_at)>Date.now())return v;storage.removeItem(KEY)}catch{storage.removeItem(KEY)}return null},set(value){storage.setItem(KEY,JSON.stringify({token:value.token,user_id:value.user_id,expires_at:value.expires_at}))},clear(){storage.removeItem(KEY)}}}
+export class ApiError extends Error{constructor(message,status=0,code='NETWORK_ERROR'){super(message);this.name='ApiError';this.status=status;this.code=code}}
+export function defaultApiBase(moduleUrl=import.meta.url){try{const url=new URL(moduleUrl);if(['http:','https:'].includes(url.protocol))return new URL('../../api/v1',url).pathname;}catch{}return '/api/v1';}
+export function createApi({session,onUnauthorized=()=>{},fetcher=globalThis.fetch.bind(globalThis),base=defaultApiBase()}){if(!/^\/(?!\/)[A-Za-z0-9/_-]+$/.test(base))throw new ApiError('Invalid API configuration',0,'INVALID_CONFIG');return async function api(path,{method,body,signal}={}){
+ if(typeof path!=='string'||!path.startsWith('/')||path.startsWith('//')||/[#\\]/.test(path))throw new ApiError('Invalid API path',0,'INVALID_PATH');
+ if(path.startsWith('/api/v1/'))path=path.slice('/api/v1'.length);
+ const token=session.get()?.token;let response;try{response=await fetcher(base+path,{method:method||(body===undefined?'GET':'POST'),headers:{Accept:'application/json',...(body===undefined?{}:{'Content-Type':'application/json'}),...(token?{Authorization:'Bearer '+token}:{})},body:body===undefined?undefined:JSON.stringify(body),signal,credentials:'same-origin',cache:'no-store'})}catch(e){if(e.name==='AbortError')throw e;throw new ApiError('连接失败，请检查网络后重试。')}
+ let data=null;if(response.status!==204){try{data=await response.json()}catch{throw new ApiError('服务返回了无法读取的响应。',response.status,'INVALID_RESPONSE')}}
+ if(!response.ok){if(response.status===401&&token&&session.get()?.token===token){session.clear();onUnauthorized()}throw new ApiError(data?.error?.message||'请求未完成。',response.status,data?.error?.code||'REQUEST_FAILED')}return data;
+}}
+export function humanError(e){return ({UNAUTHENTICATED:'登录已失效，请重新登录。',INVALID_CREDENTIALS:'账号或密码不正确。',USERNAME_TAKEN:'这个用户名已被使用。',INVALID_REQUEST:'请检查填写的内容。',INVALID_CREDENTIALS_FORMAT:'用户名或密码格式不正确。',NETWORK_ERROR:'连接失败，请检查网络后重试。'})[e.code]|| (e.status===404?'未找到此存档，或当前账号无权访问。':e.status===429?'请求较多，请稍后再试。':e.status>=500?'服务暂时不可用，请稍后重试。':e.message||'操作未完成。')}

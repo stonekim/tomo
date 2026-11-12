@@ -1,0 +1,41 @@
+{
+  "task": "TOMO-MVP-02",
+  "status": "ready_for_integration",
+  "platform_patch_commits": [
+    "4eb8638",
+    "57087e1"
+  ],
+  "unit_tests": {
+    "command": "PYTHONPATH=src python -m pytest tests/platform tests/plans -q",
+    "passed": 85,
+    "platform": 53,
+    "plans": 32,
+    "runtime_seconds": 20.07,
+    "warnings": [
+      "Existing Starlette TestClient AnyIO BlockingPortal deprecation warning"
+    ]
+  },
+  "browser": {
+    "command": "PYTHONPATH=src python tests/plans/browser_harness.py",
+    "passed": 15,
+    "report": "browser-verification.json",
+    "scope": "temporary SQLite and local HTTP; provider disabled; synthetic data"
+  },
+  "schemas": "Draft 2020-12 schema check passed; typed plan requests exposed in OpenAPI",
+  "platform_contract_check": {
+    "exit_code": 0,
+    "stdout": "Contract v1 schema and OpenAPI match\n",
+    "stderr": ""
+  },
+  "javascript_syntax": "node --check passed for plans entry and browser check",
+  "real_model_calls": null,
+  "production_deployment": false,
+  "future_prediction_accuracy": null,
+  "clean_install": "Not verified: first fresh venv attempt hit incomplete setuptools download; tests used an already installed dependency environment with this worktree on PYTHONPATH",
+  "limitations": [
+    "Real-provider smoke and strict product call quotas/output budgets remain integration work.",
+    "Browser verification is domain module against real local API, not the final shared shell deployment.",
+    "Outcomes are user self-reports, not external verification.",
+    "No automatic reminders or recurring tasks created."
+  ]
+}

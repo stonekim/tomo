@@ -1,0 +1,17 @@
+.git
+.venv
+.scratch
+.runtime
+.env
+.env.*
+data
+*.sqlite3*
+__pycache__
+.pytest_cache
+*.egg-info
+docs/research
+
+**/.env
+**/.env.*
+**/*.key
+**/*.pem

@@ -1,0 +1,877 @@
+{
+  "contract_version": 1,
+  "domain": "plan",
+  "schemas": {
+    "PlanCard": {
+      "additionalProperties": false,
+      "properties": {
+        "goal": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Goal",
+          "type": "string"
+        },
+        "completion_criteria": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Completion Criteria",
+          "type": "string"
+        },
+        "start_at": {
+          "format": "date-time",
+          "title": "Start At",
+          "type": "string"
+        },
+        "due_at": {
+          "format": "date-time",
+          "title": "Due At",
+          "type": "string"
+        },
+        "timezone": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Timezone",
+          "type": "string"
+        },
+        "facts": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Facts",
+          "type": "array"
+        },
+        "unknowns": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Unknowns",
+          "type": "array"
+        },
+        "required_hours": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Hours"
+        },
+        "available_hours_per_week": {
+          "anyOf": [
+            {
+              "maximum": 168,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Available Hours Per Week"
+        },
+        "user_judgment": {
+          "default": "unknown",
+          "enum": [
+            "yes",
+            "uncertain",
+            "no",
+            "unknown"
+          ],
+          "title": "User Judgment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "goal",
+        "completion_criteria",
+        "start_at",
+        "due_at",
+        "timezone"
+      ],
+      "title": "Card",
+      "type": "object"
+    },
+    "PlanJudgmentState": {
+      "$defs": {
+        "Assessment": {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "rules",
+              "default": "rules",
+              "title": "Mode",
+              "type": "string"
+            },
+            "assessed_at": {
+              "format": "date-time",
+              "title": "Assessed At",
+              "type": "string"
+            },
+            "judgment": {
+              "enum": [
+                "feasible",
+                "at_risk",
+                "unknown"
+              ],
+              "title": "Judgment",
+              "type": "string"
+            },
+            "reason": {
+              "maxLength": 2000,
+              "minLength": 1,
+              "title": "Reason",
+              "type": "string"
+            },
+            "risks": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "title": "Risks",
+              "type": "array"
+            },
+            "scenarios": {
+              "items": {
+                "$ref": "#/$defs/Scenario"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "title": "Scenarios",
+              "type": "array"
+            },
+            "baseline": {
+              "$ref": "#/$defs/Baseline"
+            },
+            "limitation": {
+              "const": "时间预算不是现实成功概率；输入是用户自报估计，结果未验证。",
+              "title": "Limitation",
+              "type": "string"
+            }
+          },
+          "required": [
+            "assessed_at",
+            "judgment",
+            "reason",
+            "risks",
+            "scenarios",
+            "baseline",
+            "limitation"
+          ],
+          "title": "Assessment",
+          "type": "object"
+        },
+        "Baseline": {
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "const": "time_budget_v1",
+              "default": "time_budget_v1",
+              "title": "Method",
+              "type": "string"
+            },
+            "available_hours": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Available Hours"
+            },
+            "required_hours": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Required Hours"
+            },
+            "verdict": {
+              "enum": [
+                "feasible",
+                "at_risk",
+                "unknown"
+              ],
+              "title": "Verdict",
+              "type": "string"
+            }
+          },
+          "required": [
+            "available_hours",
+            "required_hours",
+            "verdict"
+          ],
+          "title": "Baseline",
+          "type": "object"
+        },
+        "Card": {
+          "additionalProperties": false,
+          "properties": {
+            "goal": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Goal",
+              "type": "string"
+            },
+            "completion_criteria": {
+              "maxLength": 2000,
+              "minLength": 1,
+              "title": "Completion Criteria",
+              "type": "string"
+            },
+            "start_at": {
+              "format": "date-time",
+              "title": "Start At",
+              "type": "string"
+            },
+            "due_at": {
+              "format": "date-time",
+              "title": "Due At",
+              "type": "string"
+            },
+            "timezone": {
+              "maxLength": 80,
+              "minLength": 1,
+              "title": "Timezone",
+              "type": "string"
+            },
+            "facts": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "title": "Facts",
+              "type": "array"
+            },
+            "unknowns": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "title": "Unknowns",
+              "type": "array"
+            },
+            "required_hours": {
+              "anyOf": [
+                {
+                  "maximum": 10000,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Required Hours"
+            },
+            "available_hours_per_week": {
+              "anyOf": [
+                {
+                  "maximum": 168,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Available Hours Per Week"
+            },
+            "user_judgment": {
+              "default": "unknown",
+              "enum": [
+                "yes",
+                "uncertain",
+                "no",
+                "unknown"
+              ],
+              "title": "User Judgment",
+              "type": "string"
+            }
+          },
+          "required": [
+            "goal",
+            "completion_criteria",
+            "start_at",
+            "due_at",
+            "timezone"
+          ],
+          "title": "Card",
+          "type": "object"
+        },
+        "Scenario": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            },
+            "assumptions": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 10,
+              "minItems": 1,
+              "title": "Assumptions",
+              "type": "array"
+            },
+            "actions": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 10,
+              "minItems": 1,
+              "title": "Actions",
+              "type": "array"
+            }
+          },
+          "required": [
+            "name",
+            "assumptions",
+            "actions"
+          ],
+          "title": "Scenario",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "card": {
+          "$ref": "#/$defs/Card"
+        },
+        "assessment": {
+          "$ref": "#/$defs/Assessment"
+        },
+        "update_note": {
+          "default": "",
+          "maxLength": 3000,
+          "title": "Update Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "card",
+        "assessment"
+      ],
+      "title": "JudgmentState",
+      "type": "object"
+    },
+    "PlanOutcomeState": {
+      "$defs": {
+        "Outcome": {
+          "additionalProperties": false,
+          "properties": {
+            "judgment_id": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Judgment Id",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "completed",
+                "not_completed",
+                "unknown"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "evidence": {
+              "maxLength": 5000,
+              "title": "Evidence",
+              "type": "string"
+            },
+            "actual_hours": {
+              "anyOf": [
+                {
+                  "maximum": 10000,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Actual Hours"
+            },
+            "recorded_at": {
+              "format": "date-time",
+              "title": "Recorded At",
+              "type": "string"
+            },
+            "source": {
+              "const": "self_reported",
+              "default": "self_reported",
+              "title": "Source",
+              "type": "string"
+            },
+            "correction_note": {
+              "default": "",
+              "maxLength": 3000,
+              "title": "Correction Note",
+              "type": "string"
+            }
+          },
+          "required": [
+            "judgment_id",
+            "status",
+            "evidence",
+            "recorded_at"
+          ],
+          "title": "Outcome",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "outcome": {
+          "$ref": "#/$defs/Outcome"
+        }
+      },
+      "required": [
+        "outcome"
+      ],
+      "title": "OutcomeState",
+      "type": "object"
+    },
+    "PlanCreate": {
+      "$defs": {
+        "CardInput": {
+          "additionalProperties": false,
+          "properties": {
+            "goal": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Goal",
+              "type": "string"
+            },
+            "completion_criteria": {
+              "maxLength": 2000,
+              "minLength": 1,
+              "title": "Completion Criteria",
+              "type": "string"
+            },
+            "due_at": {
+              "format": "date-time",
+              "title": "Due At",
+              "type": "string"
+            },
+            "timezone": {
+              "maxLength": 80,
+              "minLength": 1,
+              "title": "Timezone",
+              "type": "string"
+            },
+            "facts": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "title": "Facts",
+              "type": "array"
+            },
+            "unknowns": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "title": "Unknowns",
+              "type": "array"
+            },
+            "required_hours": {
+              "anyOf": [
+                {
+                  "maximum": 10000,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Required Hours"
+            },
+            "available_hours_per_week": {
+              "anyOf": [
+                {
+                  "maximum": 168,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Available Hours Per Week"
+            },
+            "user_judgment": {
+              "default": "unknown",
+              "enum": [
+                "yes",
+                "uncertain",
+                "no",
+                "unknown"
+              ],
+              "title": "User Judgment",
+              "type": "string"
+            }
+          },
+          "required": [
+            "goal",
+            "completion_criteria",
+            "due_at",
+            "timezone"
+          ],
+          "title": "CardInput",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "card": {
+          "$ref": "#/$defs/CardInput"
+        }
+      },
+      "required": [
+        "title",
+        "idempotency_key",
+        "card"
+      ],
+      "title": "CreateInput",
+      "type": "object"
+    },
+    "PlanUpdate": {
+      "$defs": {
+        "CardInput": {
+          "additionalProperties": false,
+          "properties": {
+            "goal": {
+              "maxLength": 300,
+              "minLength": 1,
+              "title": "Goal",
+              "type": "string"
+            },
+            "completion_criteria": {
+              "maxLength": 2000,
+              "minLength": 1,
+              "title": "Completion Criteria",
+              "type": "string"
+            },
+            "due_at": {
+              "format": "date-time",
+              "title": "Due At",
+              "type": "string"
+            },
+            "timezone": {
+              "maxLength": 80,
+              "minLength": 1,
+              "title": "Timezone",
+              "type": "string"
+            },
+            "facts": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "title": "Facts",
+              "type": "array"
+            },
+            "unknowns": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "title": "Unknowns",
+              "type": "array"
+            },
+            "required_hours": {
+              "anyOf": [
+                {
+                  "maximum": 10000,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Required Hours"
+            },
+            "available_hours_per_week": {
+              "anyOf": [
+                {
+                  "maximum": 168,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Available Hours Per Week"
+            },
+            "user_judgment": {
+              "default": "unknown",
+              "enum": [
+                "yes",
+                "uncertain",
+                "no",
+                "unknown"
+              ],
+              "title": "User Judgment",
+              "type": "string"
+            }
+          },
+          "required": [
+            "goal",
+            "completion_criteria",
+            "due_at",
+            "timezone"
+          ],
+          "title": "CardInput",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "idempotency_key": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "judgment",
+            "update"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "card": {
+          "$ref": "#/$defs/CardInput"
+        },
+        "update_note": {
+          "maxLength": 3000,
+          "minLength": 1,
+          "title": "Update Note",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expected_revision",
+        "idempotency_key",
+        "kind",
+        "card",
+        "update_note",
+        "recorded_at"
+      ],
+      "title": "VersionInput",
+      "type": "object"
+    },
+    "PlanOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "idempotency_key": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "based_on": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Based On",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "not_completed",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence": {
+          "default": "",
+          "maxLength": 5000,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "actual_hours": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actual Hours"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "correction_note": {
+          "default": "",
+          "maxLength": 3000,
+          "title": "Correction Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expected_revision",
+        "idempotency_key",
+        "based_on",
+        "status",
+        "recorded_at"
+      ],
+      "title": "OutcomeInput",
+      "type": "object"
+    },
+    "PlanModelSuggestions": {
+      "$defs": {
+        "Scenario": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "maxLength": 100,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            },
+            "assumptions": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 10,
+              "minItems": 1,
+              "title": "Assumptions",
+              "type": "array"
+            },
+            "actions": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 10,
+              "minItems": 1,
+              "title": "Actions",
+              "type": "array"
+            }
+          },
+          "required": [
+            "name",
+            "assumptions",
+            "actions"
+          ],
+          "title": "Scenario",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "risks": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "title": "Risks",
+          "type": "array"
+        },
+        "scenarios": {
+          "items": {
+            "$ref": "#/$defs/Scenario"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Scenarios",
+          "type": "array"
+        }
+      },
+      "required": [
+        "risks",
+        "scenarios"
+      ],
+      "title": "Suggestions",
+      "type": "object"
+    }
+  },
+  "business_constraints": [
+    "Original plan horizon is 7–30 calendar days in the selected IANA zone; timestamps must have a UTC offset and timezone is an IANA zone.",
+    "Server clock controls due-date eligibility. Referenced judgment is resolved by server, never supplied by clients.",
+    "Only append immutable versions. Criteria/goal/deadline changes require a new judgment, not an update.",
+    "No numeric success probability; qualitative time-budget baseline is not a validated forecast.",
+    "Create includes an atomic first judgment and owner-scoped idempotency key.",
+    "recorded_at is generated once per user mutation; retry identical payload/key. Server verifies freshness before committing.",
+    "Outcomes are self-reported, must reference an existing judgment and cannot precede that judgment’s deadline.",
+    "Unknown/missing results stay unknown/null, never success/failure/zero."
+  ]
+}

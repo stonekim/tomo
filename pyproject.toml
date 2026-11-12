@@ -19,4 +19,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-testpaths = ["tests/platform"]
+testpaths = ["tests/platform", "tests/game", "tests/plans", "tests/system"]

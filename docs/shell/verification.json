@@ -1,0 +1,20 @@
+{
+  "verified_at": "2026-11-12T16:53:04.038773+00:00",
+  "browser_pass": true,
+  "browser_checks": 18,
+  "node_tests": 5,
+  "scope": "Isolated real API/database; domain modules deliberately unavailable to exercise error recovery",
+  "first_failure": "QA fixture used Save response fields instead of SaveCreate; corrected to state; first output preserved",
+  "limitations": [
+    "01/02 deliberately unavailable in shell QA",
+    "No remote delete API in foundation",
+    "No real model or production deployment verified by 03"
+  ],
+  "evidence": {
+    "browser-result.json": "8b34bcefb21dbcb5a19726a1aa3f0b4d40876e5ccab9e821f2f5f07ce4811f48",
+    "run.json": "e2f6a385a3e578dd26e106c5d19045026504ff5ec6c9a2f2a0aace048ff2cf96",
+    "api-tests.txt": "87783558555be6496155ae42af40f427627a72070d39efeac29d99c8b73154a0",
+    "shell-393.png": "e1d2fe944c1f3c8d013aa57243665e883351aa7620dc9ca09b8e2d80309edfb5",
+    "shell-1440.png": "7c9219ecaa84136cf1c04c01f7c8af2145067e4ab363ded230219db5c26f4cac"
+  }
+}

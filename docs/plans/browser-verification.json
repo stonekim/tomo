@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "name": "mutation locks inputs while response pending",
+      "pass": true
+    },
+    {
+      "name": "duplicate pending submit is ignored",
+      "pass": true
+    },
+    {
+      "name": "lost reply retry reuses idempotent create",
+      "pass": true
+    },
+    {
+      "name": "real API creates first locked judgment",
+      "pass": true
+    },
+    {
+      "name": "no premature result entry",
+      "pass": true
+    },
+    {
+      "name": "unknown review is not a failure",
+      "pass": true
+    },
+    {
+      "name": "manual update preserves prior history",
+      "pass": true
+    },
+    {
+      "name": "disabled provider is honestly labeled",
+      "pass": true
+    },
+    {
+      "name": "cleanup removes old UI",
+      "pass": true
+    },
+    {
+      "name": "remount restores persisted plan",
+      "pass": true
+    },
+    {
+      "name": "full page reload restores version history",
+      "pass": true
+    },
+    {
+      "name": "no horizontal overflow 1440",
+      "pass": true
+    },
+    {
+      "name": "no horizontal overflow 393",
+      "pass": true
+    },
+    {
+      "name": "untrusted card text does not become HTML",
+      "pass": true
+    },
+    {
+      "name": "no JavaScript errors",
+      "pass": true
+    }
+  ],
+  "scope": "Temporary DB/local HTTP, synthetic records, provider disabled; no real model or production use"
+}

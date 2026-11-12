@@ -1,0 +1,2 @@
+/* Shared baseline for domain modules; domain owners keep their own selectors scoped. */
+.experience button{margin:4px 6px 4px 0}.experience label{margin-bottom:12px}.experience table{border-collapse:collapse;max-width:100%;display:block;overflow-x:auto}.experience th,.experience td{padding:8px;border:1px solid #39525e}.experience ul,.experience ol{padding-left:22px}

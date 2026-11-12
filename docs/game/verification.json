@@ -1,0 +1,76 @@
+{
+  "timestamp": "2026-11-12T16:58:44.055026+00:00",
+  "backend": {
+    "exit_code": 0,
+    "stdout": "....................................................................     [100%]\n=============================== warnings summary ===============================\n<venv>/site-packages/starlette/testclient.py:37\n  <venv>/site-packages/starlette/testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.\n    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n68 passed, 1 warning in 9.84s\n",
+    "stderr": ""
+  },
+  "browser": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "browser QA registration",
+        "pass": true
+      },
+      {
+        "name": "creates real persisted local game",
+        "pass": true
+      },
+      {
+        "name": "scenario does not execute HTML",
+        "pass": true
+      },
+      {
+        "name": "explicit non-model label",
+        "pass": true
+      },
+      {
+        "name": "complete playable ending",
+        "pass": true
+      },
+      {
+        "name": "ending links to real events",
+        "pass": true
+      },
+      {
+        "name": "branch choice changes ending",
+        "pass": true
+      },
+      {
+        "name": "refresh restores selected branch",
+        "pass": true
+      },
+      {
+        "name": "original ending survives independent fork",
+        "pass": true
+      },
+      {
+        "name": "no horizontal overflow 1440",
+        "pass": true
+      },
+      {
+        "name": "no horizontal overflow 393",
+        "pass": true
+      },
+      {
+        "name": "missing model config stays explicit",
+        "pass": true
+      },
+      {
+        "name": "no browser JavaScript errors",
+        "pass": true
+      }
+    ]
+  },
+  "real_model_acceptance": null,
+  "production_deployed": false,
+  "remaining": [
+    "Coordinated trusted owner/save/branch context hardening for generic event endpoint",
+    "Full shell integration and deployment/backup/real-provider acceptance belong to release lane"
+  ],
+  "first_failures": [
+    "Initial backend fixture attempted conversation with NPC in another location and was correctly rejected",
+    "Initial browser fixture used disallowed hyphenated username; registration contract corrected"
+  ],
+  "visual_review": "393px screenshot inspected; raw tool JSON and full IDs removed from default product flow"
+}
