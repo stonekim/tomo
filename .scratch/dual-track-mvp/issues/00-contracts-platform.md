@@ -1,8 +1,8 @@
 # TOMO-MVP-00｜契约与共享底座
 
-Status: ready-for-agent
-Owner: SuperAgent（待接单）
-Blocked by: 无；待实际接单
+Status: in-progress
+Owner: SuperAgent
+Blocked by: 无
 Budget: 用户确认总时长/token均不限。
 
 ## 目标与写范围
