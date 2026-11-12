@@ -4,15 +4,18 @@ from pathlib import Path
 from datetime import datetime,timezone,timedelta
 from unittest.mock import patch
 import uvicorn
+from dataclasses import replace
 from tomo.app import create_product_app
 from tomo.platform.config import Settings
 ROOT=Path(__file__).resolve().parents[2]
 prefix=os.environ.get('TOMO_QA_PREFIX','').rstrip('/')
-out=ROOT/'.scratch/_tmp/release-qa'/(('prefix' if prefix else ''));out.mkdir(parents=True,exist_ok=True)
+label=os.environ.get('TOMO_QA_LABEL') or ('prefix' if prefix else '')
+out=ROOT/'.scratch/_tmp/release-qa'/label;out.mkdir(parents=True,exist_ok=True)
 with tempfile.TemporaryDirectory(prefix='tomo-product-browser-') as folder:
     clock=[datetime.now(timezone.utc)]
     with patch('tomo.plans.service.utc_now',side_effect=lambda:clock[0]),patch('tomo.platform.store.timestamp',side_effect=lambda:clock[0].isoformat()),patch('tomo.platform.auth.time.time',side_effect=lambda:clock[0].timestamp()):
-        app=create_product_app(Settings(database=str(Path(folder)/'qa.sqlite3')))
+        settings=replace(Settings.from_env(),database=str(Path(folder)/'qa.sqlite3')) if os.environ.get('TOMO_QA_REAL')=='1' else Settings(database=str(Path(folder)/'qa.sqlite3'))
+        app=create_product_app(settings)
         app.state.auth.clock=lambda:clock[0].timestamp()
         @app.post('/__qa__/advance')
         def advance():
@@ -49,7 +52,10 @@ with tempfile.TemporaryDirectory(prefix='tomo-product-browser-') as folder:
             threading.Thread(target=proxy.serve_forever,daemon=True).start()
             origin=f'http://127.0.0.1:{proxy.server_port}'+prefix
         try:
-            r=subprocess.run(['node',str(ROOT/'tests/system/browser.cjs')],env=dict(os.environ,TOMO_PRODUCT_ORIGIN=origin,TOMO_PRODUCT_OUT=str(out)),text=True,capture_output=True,timeout=180)
+            node_env={k:os.environ[k] for k in ('PATH','HOME','LANG','TOMO_PLAYWRIGHT_MODULE','TOMO_CHROMIUM_PATH') if k in os.environ}
+            node_env.update(TOMO_PRODUCT_ORIGIN=origin,TOMO_PRODUCT_OUT=str(out))
+            script=ROOT/os.environ.get('TOMO_BROWSER_SCRIPT','tests/system/browser.cjs')
+            r=subprocess.run(['node',str(script)],env=node_env,text=True,capture_output=True,timeout=180)
             (out/'browser-run.json').write_text(json.dumps({'exit_code':r.returncode,'stdout':r.stdout,'stderr':r.stderr},indent=2))
             print(r.stdout);print(r.stderr if r.returncode else '');raise SystemExit(r.returncode)
         finally:

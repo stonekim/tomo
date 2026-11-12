@@ -1,12 +1,13 @@
 {
-  "verified_at": "2026-11-12T17:37:16.831796+00:00",
+  "verified_at": "2026-11-12T17:43:35.677735+00:00",
   "status": "integrated_candidate_verified_pending_independent_review",
   "tests": {
     "python": 116,
     "node_api": 8,
     "product_browser": 21,
     "container": 5,
-    "prefix_product_browser": 21
+    "prefix_product_browser": 21,
+    "real_provider_browser": 5
   },
   "product_browser_ok": true,
   "real_provider": {
@@ -93,7 +94,7 @@
         "pass": true
       }
     ],
-    "image_id": "sha256:e341da3f53060b571cb630c6a4c266122436db92572e1792f3241d3ab4594891",
+    "image_id": "sha256:af7d4cdf041e29b20726a97f790ab8407aac7aa0c6b482d4896c4967bd67709c",
     "scope": "Disposable nonroot container, temporary named volume, synthetic user, provider disabled; not a public TLS launch"
   },
   "review": "pending Agent Team independent candidate review",
@@ -109,16 +110,18 @@
     "private_configuration": "host-controlled credential reference; no key in source or unit arguments"
   },
   "evidence_sha256": {
-    "python-tests.txt": "91210e87f9e90e026b06a4042bee9782b15470e494cfe425f612d10b779a55fc",
-    "node-tests.txt": "22738406f33ae836f626a48e5991f83d1d0bf4f8df83151182f38a47d0d0f23c",
+    "python-tests.txt": "96cf49c7ecb5f6ba9fd9191e31fc37f2810274467adb5dedb5c0b7b738f71007",
+    "node-tests.txt": "2964c4332f4ab5624b8842a38a1d331c64029b1720bd2290a0096c8ff903cf60",
     "browser-result.json": "c350f6c2f5aa559253effd645b7b3af0fc4c16ccd4da2e107e5d218ab7ad608b",
     "real-provider-smoke.json": "672d22b238f4bb408cb6faa3d98793e96b364bc0651208c6291e1b2bce069204",
-    "container-result.json": "303dd6f77602776d60d0e35a71570a1df0a6ddd865381fd6da6117e5b6606314",
-    "docker-build-final.txt": "994fdbb10e13ca394a3a6967fddad7bfec06bdc77bbe451108debe7327ec93cf",
+    "container-result.json": "9bf75efe17bed04e65e0191ea9f7d63ba0b26716f6efd0759e19456ea2d3cee6",
+    "docker-build-final.txt": "c08917d636be916c631ba3c8458a43ec897d3deaf4cd3d4e261043e718742bbd",
     "contracts.txt": "81d04679d083558ba639c35cbb0092aa4d2d2fb235c685932edfe86d286f0e74",
     "product-contracts.txt": "29c18b8b7edb5bfb0c867a3baeb2437dfa9456856bc281ad947fb552d45f7ffc",
     "prefix/browser-result.json": "c350f6c2f5aa559253effd645b7b3af0fc4c16ccd4da2e107e5d218ab7ad608b",
-    "prefix/browser-run.json": "b01026cc37f0b8db745960cded34aad1736114f7681fa2e8b8768e5bd0a572a1"
+    "prefix/browser-run.json": "b01026cc37f0b8db745960cded34aad1736114f7681fa2e8b8768e5bd0a572a1",
+    "real-browser/browser-result.json": "d9d9f912a56ed88b5a1f3294fc1be97c38f5d9b504055e7578a9a1e960a38b68",
+    "real-browser/browser-run.json": "67485dbde5446d9135c2ed7f82e293cde84c4842443292781c12cf8772fb15e8"
   },
   "prefix_deployment": {
     "prefix": "/read/tomo/app/",
@@ -134,5 +137,87 @@
       "393/1440 layout"
     ]
   },
-  "verification_redaction": "Host-specific warning paths normalized to <venv>; test counts, failures and warnings preserved"
+  "verification_redaction": "Host-specific warning paths normalized to <venv>; test counts, failures and warnings preserved",
+  "real_provider_browser": {
+    "ok": true,
+    "checks": [
+      {
+        "name": "no provider credential in browser-driver environment",
+        "pass": true
+      },
+      {
+        "name": "browser game accepts actual real model tool proposal",
+        "pass": true
+      },
+      {
+        "name": "browser plan uses real structured model suggestions",
+        "pass": true
+      },
+      {
+        "name": "two actual real audits with reported token usage",
+        "pass": true
+      },
+      {
+        "name": "no JavaScript errors",
+        "pass": true
+      }
+    ],
+    "audits": [
+      {
+        "purpose": "game.npc_tools.v1",
+        "mode": "real",
+        "status": "ok",
+        "model": "glm-5.3-flash",
+        "usage": {
+          "cached_input_tokens": null,
+          "cost": null,
+          "currency": null,
+          "input_tokens": 521,
+          "output_tokens": 605
+        }
+      },
+      {
+        "purpose": "plan.conditional_scenarios",
+        "mode": "real",
+        "status": "ok",
+        "model": "glm-5.3-flash",
+        "usage": {
+          "cached_input_tokens": null,
+          "cost": null,
+          "currency": null,
+          "input_tokens": 310,
+          "output_tokens": 807
+        }
+      }
+    ],
+    "scope": "Actual Chromium + HTTP app + real provider, synthetic users and temporary DB; local fixed test-clock baseline, no latency or wall-clock audit timing claim; no credentials passed to Node/Chromium"
+  },
+  "integration_provider_accounting": {
+    "scope": "Integration smoke and real-browser QA only; excludes parent provider validation and coding-agent token consumption",
+    "actual_attempts": 10,
+    "totals": {
+      "input_tokens": {
+        "reported_subtotal": 3867,
+        "unknown_attempts": 0,
+        "complete": true
+      },
+      "output_tokens": {
+        "reported_subtotal": 7296,
+        "unknown_attempts": 0,
+        "complete": true
+      },
+      "cached_input_tokens": {
+        "reported_subtotal": 512,
+        "unknown_attempts": 9,
+        "complete": false
+      },
+      "cost": {
+        "reported_subtotal": null,
+        "unknown_attempts": 10,
+        "complete": false
+      }
+    },
+    "currency": "unknown",
+    "coding_agent_usage_total": "unknown"
+  }
 }
